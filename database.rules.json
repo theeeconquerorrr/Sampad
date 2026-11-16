@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "orders": {
+      "$orderId": {
+        ".write": false,
+        "status": {
+          ".read": "auth != null && (auth.uid === root.child('orders').child($orderId).child('customerUid').val() || auth.uid === root.child('orders').child($orderId).child('courierUid').val())"
+        },
+        "tracking": {
+          ".read": "auth != null && (auth.uid === root.child('orders').child($orderId).child('customerUid').val() || auth.uid === root.child('orders').child($orderId).child('courierUid').val())",
+          ".write": "auth != null && auth.uid === root.child('orders').child($orderId).child('courierUid').val() && root.child('orders').child($orderId).child('active').val() === true",
+          ".validate": "newData.hasChildren(['lat', 'lng', 'accuracy', 'updatedAt', 'active']) && newData.numChildren() === 5",
+          "lat": {
+            ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+          },
+          "lng": {
+            ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+          },
+          "accuracy": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "active": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    }
+  }
+}

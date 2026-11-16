@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseDrop — Medicine Delivery Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .cold-chain-badge {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            color: #0369a1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Top Emergency / Cold-Chain Banner -->
+    <div class="bg-teal-900 text-teal-50 text-xs py-2 px-4 text-center font-medium">
+        DEMO / PROTOTYPE • No medicines are sold or delivered through this page
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand & ETA -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
+                        +
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold tracking-tight text-slate-900">Pulse<span class="text-teal-600">Drop</span></span>
+                        <div class="text-[11px] font-semibold text-slate-500">
+                            Demo only • No live delivery service
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-xl hidden md:block">
+                <div class="relative">
+                    <label class="sr-only" for="searchInput">Search medicines and products</label>
+                    <input type="search" id="searchInput" placeholder="Search medicines, insulin, first-aid, diagnostics..." 
+                        class="w-full pl-10 pr-4 py-2 bg-slate-100 border border-transparent focus:border-teal-500 focus:bg-white rounded-xl text-sm outline-none transition">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openRxModal()" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Upload Rx
+                </button>
+                <button id="cartOpenBtn" onclick="toggleCart()" class="relative flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl shadow-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span>Cart</span>
+                    <span id="cartCount" class="bg-white text-teal-700 text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+        <div class="md:hidden px-4 pb-3">
+            <div class="relative">
+                <label class="sr-only" for="mobileSearchInput">Search medicines and products</label>
+                <input type="search" id="mobileSearchInput" placeholder="Search medicines and products..."
+                    class="w-full pl-10 pr-4 py-2 bg-slate-100 border border-transparent focus:border-teal-500 focus:bg-white rounded-xl text-sm outline-none transition">
+                <svg aria-hidden="true" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <p id="appNotice" role="alert" class="hidden mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900"></p>
+        
+        <!-- Hero / Quick Action Banner -->
+        <div class="bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 rounded-2xl p-6 sm:p-8 text-white mb-8 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="max-w-xl">
+                <span class="inline-block px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
+                    Prototype • Example product catalogue
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight mb-2">
+                    A prototype for a local medicine delivery experience.
+                </h1>
+                <p class="text-teal-100 text-sm">
+                    This demo does not represent a pharmacy or delivery service. Product availability, prices and delivery estimates are illustrative only.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="openRxModal()" class="px-5 py-3 bg-white text-teal-800 font-bold text-sm rounded-xl shadow hover:bg-teal-50 transition">
+                    Attach Rx (demo)
+                </button>
+                <button onclick="showTrackingPanel()" class="px-5 py-3 bg-teal-950/30 text-white border border-white/40 font-bold text-sm rounded-xl hover:bg-teal-950/50 transition">
+                    Track a real order
+                </button>
+            </div>
+        </div>
+
+        <!-- Authenticated live courier tracking -->
+        <section id="trackingPanel" aria-labelledby="trackingTitle" class="hidden mb-8 bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Live courier GPS • Firebase Realtime Database</p>
+                    <h2 id="trackingTitle" tabindex="-1" class="text-xl font-extrabold mt-1">Track an existing order</h2>
+                </div>
+                <button onclick="hideTrackingPanel()" class="px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Hide tracking</button>
+            </div>
+            <p class="text-sm text-slate-600 mt-3">Sign in with the customer account linked to an order. Live sharing starts only when its assigned courier explicitly starts GPS sharing.</p>
+
+            <form id="customerSignInForm" class="grid sm:grid-cols-3 gap-3 mt-4">
+                <div>
+                    <label for="customerEmail" class="block text-xs font-semibold mb-1">Customer email</label>
+                    <input id="customerEmail" type="email" autocomplete="username" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label for="customerPassword" class="block text-xs font-semibold mb-1">Password</label>
+                    <input id="customerPassword" type="password" autocomplete="current-password" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl">Sign in</button>
+                    <button id="customerSignOutBtn" type="button" class="hidden px-4 py-2 border border-slate-300 text-sm font-semibold rounded-xl">Sign out</button>
+                </div>
+            </form>
+            <p id="customerAuthMessage" role="status" aria-live="polite" class="text-sm mt-2 text-slate-600">Connect a Firebase project to enable live order tracking.</p>
+
+            <form id="customerTrackForm" class="flex flex-col sm:flex-row sm:items-end gap-3 mt-5 border-t border-slate-100 pt-4">
+                <div class="flex-1">
+                    <label for="customerOrderId" class="block text-xs font-semibold mb-1">Order ID</label>
+                    <input id="customerOrderId" autocomplete="off" required pattern="[A-Za-z0-9_-]{1,80}" class="w-full border border-slate-300 rounded-lg p-2 text-sm" placeholder="Enter the ID from your order confirmation">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl">Track order</button>
+            </form>
+            <p id="customerTrackMessage" role="status" aria-live="polite" class="text-sm mt-2 text-slate-600"></p>
+
+            <div id="liveTrackingDetails" class="hidden mt-4 rounded-xl border border-teal-200 bg-teal-50 p-4">
+                <p id="liveOrderStatus" class="font-bold text-teal-900"></p>
+                <p id="liveLocationState" class="text-sm mt-1"></p>
+                <p id="liveLocationCoordinates" class="text-sm font-mono mt-2"></p>
+                <p id="liveLocationAccuracy" class="text-xs text-slate-600 mt-1"></p>
+                <p id="liveLocationUpdatedAt" class="text-xs text-slate-600 mt-1"></p>
+                <a id="liveMapLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-3 text-sm font-semibold text-teal-800 underline">View latest courier position on OpenStreetMap</a>
+            </div>
+            <p class="mt-4 text-xs text-slate-500">The browser location API may combine GPS, Wi-Fi, or network signals; it does not expose cell-tower IDs. Location sharing requires courier consent and a secure HTTPS page.</p>
+        </section>
+
+        <!-- Category Filters -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6" id="categoryTabs">
+            <button data-cat="All" onclick="setCategory('All')" class="cat-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white whitespace-nowrap transition">All Essentials</button>
+            <button data-cat="Common Medicines" onclick="setCategory('Common Medicines')" class="cat-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 whitespace-nowrap transition">Common Medicines</button>
+            <button data-cat="Cold-Chain" onclick="setCategory('Cold-Chain')" class="cat-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 whitespace-nowrap transition">❄️ Cold-Chain</button>
+            <button data-cat="Cardiac & Diabetes" onclick="setCategory('Cardiac & Diabetes')" class="cat-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 whitespace-nowrap transition">Cardiac & Diabetes</button>
+            <button data-cat="First Aid & Devices" onclick="setCategory('First Aid & Devices')" class="cat-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 whitespace-nowrap transition">First Aid & Devices</button>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productGrid" aria-live="polite" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Populated via JS -->
+        </div>
+    </main>
+
+    <!-- Slide-over Cart Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" onclick="toggleCart()" aria-hidden="true"></div>
+        <div role="dialog" aria-modal="true" aria-labelledby="cartTitle" tabindex="-1" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col">
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h2 id="cartTitle" class="text-lg font-bold text-slate-900">Your Demo Cart</h2>
+                    <p class="text-xs text-teal-600 font-medium">Illustrative checkout only</p>
+                </div>
+                <button onclick="toggleCart()" aria-label="Close cart" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg">✕</button>
+            </div>
+
+            <div id="cartItems" class="flex-1 overflow-y-auto p-5 space-y-4">
+                <!-- Cart items injected here -->
+            </div>
+
+            <!-- Prescription Warning if Rx item in cart -->
+            <div id="rxAlert" class="hidden mx-5 mb-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                <div class="font-bold mb-1">⚠️ Prescription Required</div>
+                An item in this demo is marked as prescription-only. Attach a file to continue; no prescription is reviewed.
+                <button onclick="openRxModal()" class="mt-2 block text-teal-700 font-bold underline">Attach Prescription Now →</button>
+            </div>
+
+            <div class="p-5 border-t border-slate-200 bg-slate-50">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-slate-500">Item Total</span>
+                    <span id="cartSubtotal" class="font-semibold">₹0</span>
+                </div>
+                <div class="flex justify-between text-sm mb-4">
+                    <span class="text-slate-500">Illustrative delivery fee</span>
+                    <span class="text-emerald-600 font-semibold">₹0 (demo)</span>
+                </div>
+                <button onclick="openCheckout()" id="checkoutBtn" disabled class="w-full py-3 bg-teal-600 disabled:bg-slate-300 hover:bg-teal-700 text-white font-bold rounded-xl shadow transition">
+                    Continue to demo checkout • ₹0
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription Upload Modal -->
+    <div id="rxModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/50" onclick="closeRxModal()" aria-hidden="true"></div>
+        <div role="dialog" aria-modal="true" aria-labelledby="rxTitle" tabindex="-1" class="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="rxTitle" class="text-lg font-bold text-slate-900 mb-1">Attach a prescription (demo)</h3>
+            <p class="text-xs text-slate-500 mb-4">This prototype does not verify prescriptions. Do not upload sensitive medical documents.</p>
+            
+            <label class="border-2 border-dashed border-teal-300 bg-teal-50/50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-teal-50 transition focus-within:ring-2 focus-within:ring-teal-600">
+                <svg class="w-8 h-8 text-teal-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span class="text-sm font-semibold text-teal-800" id="rxFileName">Click to upload JPG, PNG, or PDF</span>
+                <input id="rxFileInput" type="file" accept="image/*,.pdf" class="sr-only" onchange="handleRxUpload(this)">
+            </label>
+            <p id="rxError" role="alert" class="hidden mt-2 text-sm text-red-700">Choose an image or PDF file before saving.</p>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button onclick="closeRxModal()" aria-label="Cancel prescription upload" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                <button onclick="confirmRx()" class="px-4 py-2 text-sm font-semibold bg-teal-600 text-white rounded-xl hover:bg-teal-700">Save Prescription</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo checkout -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/50" onclick="closeCheckout()" aria-hidden="true"></div>
+        <form id="checkoutForm" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle" tabindex="-1" class="relative bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 id="checkoutTitle" class="text-lg font-bold text-slate-900">Demo checkout</h3>
+            <p class="text-sm text-amber-800 bg-amber-50 rounded-lg p-3 mt-2">Prototype only: no order or payment will be submitted.</p>
+            <div class="mt-4">
+                <label for="checkoutAddress" class="block text-sm font-semibold mb-1">Delivery address</label>
+                <textarea id="checkoutAddress" required rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></textarea>
+            </div>
+            <fieldset class="mt-4">
+                <legend class="text-sm font-semibold mb-2">Demo payment method</legend>
+                <label class="flex items-center gap-2 text-sm"><input type="radio" name="payment" value="Cash on delivery (demo)" checked> Cash on delivery (demo)</label>
+                <label class="flex items-center gap-2 text-sm mt-2"><input type="radio" name="payment" value="UPI (demo)"> UPI (demo; no payment processed)</label>
+            </fieldset>
+            <div id="checkoutSummary" class="mt-4 border-t pt-3 text-sm"></div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" onclick="closeCheckout()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Back</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold bg-teal-600 text-white rounded-xl hover:bg-teal-700">Complete demo order</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Demo order confirmation -->
+    <div id="orderToast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white p-4 rounded-2xl shadow-2xl max-w-sm border border-slate-700">
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</div>
+            <div>
+                <h4 class="font-bold text-sm">Demo order completed</h4>
+                <p class="text-xs text-slate-300 mt-1">No real order was submitted. Product details, availability and delivery are illustrative.</p>
+                <button onclick="showTrackingPanel()" class="mt-2 text-xs font-bold underline">Open real order tracker</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const medicines = [
+            { id: 1, name: "Dolo 650mg Tablet", salt: "Paracetamol (650mg)", pack: "Strip of 15 tablets", price: 34, category: "Common Medicines", rx: false, coldChain: false, eta: "14 mins" },
+            { id: 2, name: "Lantus SoloStar 100IU/ml", salt: "Insulin Glargine", pack: "3ml Prefilled Pen", price: 645, category: "Cold-Chain", rx: true, coldChain: true, eta: "18 mins" },
+            { id: 3, name: "Augmentin 625 Duo", salt: "Amoxicillin + Clavulanic Acid", pack: "Strip of 10 tablets", price: 223, category: "Common Medicines", rx: true, coldChain: false, eta: "15 mins" },
+            { id: 4, name: "Telma 40 Tablet", salt: "Telmisartan (40mg)", pack: "Strip of 15 tablets", price: 248, category: "Cardiac & Diabetes", rx: true, coldChain: false, eta: "15 mins" },
+            { id: 5, name: "Accu-Chek Active Strips", salt: "Blood Glucose Test Strips", pack: "Box of 50 strips", price: 975, category: "First Aid & Devices", rx: false, coldChain: false, eta: "14 mins" },
+            { id: 6, name: "Novorapid FlexPen", salt: "Insulin Aspart", pack: "3ml Prefilled Pen", price: 1120, category: "Cold-Chain", rx: true, coldChain: true, eta: "18 mins" },
+            { id: 7, name: "Electral ORS Powder", salt: "Sodium Chloride + Dextrose", pack: "21.8g Sachet", price: 22, category: "First Aid & Devices", rx: false, coldChain: false, eta: "12 mins" },
+            { id: 8, name: "Pan-D Capsule PR", salt: "Pantoprazole + Domperidone", pack: "Strip of 15 capsules", price: 199, category: "Common Medicines", rx: true, coldChain: false, eta: "15 mins" }
+        ];
+
+        const CART_STORAGE_KEY = "pulsedrop-demo-cart";
+        const productGrid = document.getElementById('productGrid');
+        let cart = loadCart();
+        let activeCategory = 'All';
+        let rxUploaded = false;
+        let pendingRxFile = null;
+        let searchTimer;
+        let lastFocusedElement = null;
+
+        function escapeHTML(value) {
+            return String(value).replace(/[&<>"']/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[character]);
+        }
+
+        function showStorageError(action, error) {
+            console.error(`Unable to ${action} the demo cart.`, error);
+            const notice = document.getElementById('appNotice');
+            notice.textContent = action === 'save'
+                ? 'Your browser could not save the demo cart. Changes may not be available after closing this page.'
+                : 'Your browser could not restore the demo cart. The cart has started empty.';
+            notice.classList.remove('hidden');
+        }
+
+        function saveCart() {
+            try {
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart.map(({ id, qty }) => ({ id, qty }))));
+            } catch (error) {
+                showStorageError('save', error);
+            }
+        }
+
+        function loadCart() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
+                if (!Array.isArray(saved)) throw new Error('Saved cart is not a list.');
+                return saved.flatMap(entry => {
+                    const med = medicines.find(item => item.id === entry.id);
+                    return med && Number.isSafeInteger(entry.qty) && entry.qty > 0
+                        ? [{ ...med, qty: entry.qty }]
+                        : [];
+                });
+            } catch (error) {
+                showStorageError('restore', error);
+                return [];
+            }
+        }
+
+        function renderProducts() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const filtered = medicines.filter(med => {
+                const matchesCat = activeCategory === 'All' || med.category === activeCategory;
+                const matchesSearch = med.name.toLowerCase().includes(query) || med.salt.toLowerCase().includes(query);
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                productGrid.innerHTML = '<p class="col-span-full text-center text-slate-500 py-12">No products match your search. Try another term or category.</p>';
+                return;
+            }
+
+            productGrid.innerHTML = filtered.map(med => `
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Example ETA: ${escapeHTML(med.eta)}</span>
+                            <div class="flex gap-1">
+                                ${med.coldChain ? '<span class="cold-chain-badge text-[10px] font-bold px-2 py-0.5 rounded-md">Cold-chain item</span>' : ''}
+                                ${med.rx ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-md">Rx</span>' : ''}
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base">${escapeHTML(med.name)}</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">${escapeHTML(med.salt)}</p>
+                        <p class="text-xs text-slate-400 mt-1">${escapeHTML(med.pack)}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-lg font-extrabold text-slate-900">₹${med.price}</span>
+                        <button aria-label="Add ${escapeHTML(med.name)} to cart" onclick="addToCart(${med.id})" class="px-3.5 py-1.5 bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white border border-teal-200 hover:border-teal-600 font-bold text-xs rounded-xl transition">
+                            + Add
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setCategory(category) {
+            activeCategory = category;
+            document.querySelectorAll('.cat-btn').forEach(button => {
+                const selected = button.dataset.cat === category;
+                button.className = selected
+                    ? "cat-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white whitespace-nowrap transition"
+                    : "cat-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 whitespace-nowrap transition";
+                button.setAttribute('aria-pressed', String(selected));
+            });
+            renderProducts();
+        }
+
+        function syncSearch(source) {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                const other = source.id === 'searchInput'
+                    ? document.getElementById('mobileSearchInput')
+                    : document.getElementById('searchInput');
+                other.value = source.value;
+                renderProducts();
+            }, 250);
+        }
+
+        function addToCart(id) {
+            const med = medicines.find(item => item.id === id);
+            if (!med) return;
+            const existing = cart.find(item => item.id === id);
+            if (existing) existing.qty += 1;
+            else cart.push({ ...med, qty: 1 });
+            updateCartUI();
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(entry => entry.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) cart = cart.filter(entry => entry.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+            const needsRx = cart.some(item => item.rx);
+
+            document.getElementById('cartCount').textContent = count;
+            document.getElementById('cartSubtotal').textContent = `₹${total}`;
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.disabled = count === 0 || (needsRx && !rxUploaded);
+            checkoutBtn.textContent = `Continue to demo checkout • ₹${total}`;
+            document.getElementById('rxAlert').classList.toggle('hidden', !needsRx || rxUploaded);
+
+            const container = document.getElementById('cartItems');
+            container.innerHTML = cart.length === 0
+                ? '<div class="text-center text-slate-400 text-sm py-12">Your demo cart is empty.</div>'
+                : cart.map(item => `
+                    <div class="flex items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div>
+                            <div class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                                ${escapeHTML(item.name)}
+                                ${item.coldChain ? '<span class="text-[10px] bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">Cold-chain</span>' : ''}
+                            </div>
+                            <div class="text-xs text-slate-500">₹${item.price} × ${item.qty}</div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                            <button aria-label="Remove one ${escapeHTML(item.name)}" onclick="updateQty(${item.id}, -1)" class="text-slate-600 font-bold px-1">-</button>
+                            <span class="text-xs font-bold">${item.qty}</span>
+                            <button aria-label="Add one ${escapeHTML(item.name)}" onclick="updateQty(${item.id}, 1)" class="text-teal-600 font-bold px-1">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            saveCart();
+        }
+
+        function visibleDialog() {
+            return [...document.querySelectorAll('#cartDrawer, #rxModal, #checkoutModal')]
+                .filter(dialog => !dialog.classList.contains('hidden'))
+                .pop();
+        }
+
+        function showOverlay(id) {
+            lastFocusedElement = document.activeElement;
+            const overlay = document.getElementById(id);
+            overlay.classList.remove('hidden');
+            const dialog = overlay.querySelector('[role="dialog"]');
+            const firstControl = dialog.querySelector('button, input, textarea, [tabindex="0"]');
+            (firstControl || dialog).focus();
+        }
+
+        function hideOverlay(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (lastFocusedElement instanceof HTMLElement && lastFocusedElement.isConnected) lastFocusedElement.focus();
+        }
+
+        function toggleCart() {
+            if (document.getElementById('cartDrawer').classList.contains('hidden')) showOverlay('cartDrawer');
+            else hideOverlay('cartDrawer');
+        }
+
+        function openRxModal() {
+            document.getElementById('rxError').classList.add('hidden');
+            showOverlay('rxModal');
+        }
+
+        function closeRxModal() {
+            pendingRxFile = null;
+            document.getElementById('rxFileInput').value = '';
+            document.getElementById('rxFileName').textContent = 'Click to upload JPG, PNG, or PDF';
+            document.getElementById('rxError').classList.add('hidden');
+            hideOverlay('rxModal');
+        }
+
+        function handleRxUpload(input) {
+            pendingRxFile = input.files && input.files[0] ? input.files[0] : null;
+            document.getElementById('rxFileName').textContent = pendingRxFile
+                ? pendingRxFile.name
+                : 'Click to upload JPG, PNG, or PDF';
+            document.getElementById('rxError').classList.add('hidden');
+        }
+
+        function confirmRx() {
+            if (!pendingRxFile) {
+                document.getElementById('rxError').classList.remove('hidden');
+                document.getElementById('rxFileInput').focus();
+                return;
+            }
+            rxUploaded = true;
+            closeRxModal();
+            updateCartUI();
+        }
+
+        function openCheckout() {
+            const needsRx = cart.some(item => item.rx);
+            if (cart.length === 0 || (needsRx && !rxUploaded)) {
+                updateCartUI();
+                return;
+            }
+            const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+            document.getElementById('checkoutSummary').innerHTML = `
+                <h4 class="font-semibold mb-2">Order summary</h4>
+                ${cart.map(item => `<div class="flex justify-between gap-3"><span>${escapeHTML(item.name)} × ${item.qty}</span><span>₹${item.price * item.qty}</span></div>`).join('')}
+                <div class="flex justify-between font-bold border-t mt-2 pt-2"><span>Illustrative total</span><span>₹${total}</span></div>`;
+            showOverlay('checkoutModal');
+        }
+
+        function closeCheckout() {
+            hideOverlay('checkoutModal');
+        }
+
+        function showTrackingPanel() {
+            const panel = document.getElementById('trackingPanel');
+            panel.classList.remove('hidden');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('customerEmail').focus({ preventScroll: true });
+        }
+
+        function hideTrackingPanel() {
+            document.getElementById('trackingPanel').classList.add('hidden');
+            document.dispatchEvent(new CustomEvent('pulse-hide-tracking'));
+        }
+
+        function placeOrder(event) {
+            event.preventDefault();
+            const needsRx = cart.some(item => item.rx);
+            if (cart.length === 0 || (needsRx && !rxUploaded)) {
+                closeCheckout();
+                updateCartUI();
+                return;
+            }
+            cart = [];
+            rxUploaded = false;
+            pendingRxFile = null;
+            document.getElementById('checkoutForm').reset();
+            closeCheckout();
+            document.getElementById('cartDrawer').classList.add('hidden');
+            document.getElementById('cartOpenBtn').focus();
+            updateCartUI();
+            const toast = document.getElementById('orderToast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 6000);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', event => syncSearch(event.currentTarget));
+        document.getElementById('mobileSearchInput').addEventListener('input', event => syncSearch(event.currentTarget));
+        document.getElementById('checkoutForm').addEventListener('submit', placeOrder);
+        document.querySelectorAll('.cat-btn').forEach(button => {
+            button.setAttribute('aria-pressed', String(button.dataset.cat === 'All'));
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                const dialog = visibleDialog();
+                if (dialog) {
+                    const closers = { cartDrawer: toggleCart, rxModal: closeRxModal, checkoutModal: closeCheckout };
+                    closers[dialog.id]();
+                }
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const overlay = visibleDialog();
+            if (!overlay) return;
+            const dialog = overlay.querySelector('[role="dialog"]');
+            const controls = [...dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [href], [tabindex="0"]')]
+                .filter(control => control.getClientRects().length > 0);
+            if (!controls.length) {
+                event.preventDefault();
+                dialog.focus();
+                return;
+            }
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+
+        renderProducts();
+        updateCartUI();
+    </script>
+    <script type="module" src="./pulsedrop-realtime/customer-tracking.js"></script>
+</body>
+</html>
