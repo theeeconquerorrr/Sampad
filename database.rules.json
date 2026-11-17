@@ -1,15 +1,32 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "orders": {
       "$orderId": {
-        ".write": false,
+        ".read": "auth != null && (auth.uid === data.child('customerUid').val() || auth.uid === data.child('courierUid').val() || (root.child('couriers').child(auth.uid).child('enabled').val() === true && data.child('status').val() === 'placed' && data.child('courierUid').val() === ''))",
+        ".write": "auth != null && ((!data.exists() && newData.child('customerUid').val() === auth.uid && newData.child('courierUid').val() === '' && newData.child('active').val() === false && newData.child('status').val() === 'placed' && !newData.child('tracking').exists()) || (root.child('couriers').child(auth.uid).child('enabled').val() === true && newData.child('customerUid').val() === data.child('customerUid').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('tracking').exists() === data.child('tracking').exists() && newData.child('tracking').child('lat').val() === data.child('tracking').child('lat').val() && newData.child('tracking').child('lng').val() === data.child('tracking').child('lng').val() && newData.child('tracking').child('accuracy').val() === data.child('tracking').child('accuracy').val() && newData.child('tracking').child('updatedAt').val() === data.child('tracking').child('updatedAt').val() && newData.child('tracking').child('active').val() === data.child('tracking').child('active').val() && ((data.child('status').val() === 'placed' && data.child('courierUid').val() === '' && data.child('active').val() === false && newData.child('courierUid').val() === auth.uid && newData.child('status').val() === 'packed' && newData.child('active').val() === true) || (data.child('courierUid').val() === auth.uid && data.child('status').val() === 'packed' && data.child('active').val() === true && newData.child('courierUid').val() === auth.uid && newData.child('status').val() === 'picked_up' && newData.child('active').val() === true) || (data.child('courierUid').val() === auth.uid && data.child('status').val() === 'picked_up' && data.child('active').val() === true && newData.child('courierUid').val() === auth.uid && newData.child('status').val() === 'delivered' && newData.child('active').val() === false))))",
+        ".validate": "newData.hasChildren(['customerUid', 'courierUid', 'active', 'status', 'createdAt']) && newData.child('customerUid').isString() && newData.child('courierUid').isString() && newData.child('active').isBoolean() && newData.child('status').isString() && newData.child('createdAt').isNumber() && ((newData.child('status').val() === 'placed' && newData.child('courierUid').val() === '' && newData.child('active').val() === false) || (newData.child('status').val() === 'packed' && newData.child('courierUid').val() !== '' && newData.child('active').val() === true) || (newData.child('status').val() === 'picked_up' && newData.child('courierUid').val() !== '' && newData.child('active').val() === true) || (newData.child('status').val() === 'delivered' && newData.child('courierUid').val() !== '' && newData.child('active').val() === false))",
+        "customerUid": {
+          ".validate": "newData.isString() && newData.val().length <= 128"
+        },
+        "courierUid": {
+          ".validate": "newData.isString() && newData.val().length <= 128"
+        },
+        "active": {
+          ".validate": "newData.isBoolean()"
+        },
         "status": {
-          ".read": "auth != null && (auth.uid === root.child('orders').child($orderId).child('customerUid').val() || auth.uid === root.child('orders').child($orderId).child('courierUid').val())"
+          ".read": "auth != null && (auth.uid === root.child('orders').child($orderId).child('customerUid').val() || auth.uid === root.child('orders').child($orderId).child('courierUid').val())",
+          ".validate": "newData.val() === 'placed' || newData.val() === 'packed' || newData.val() === 'picked_up' || newData.val() === 'delivered'"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "tracking": {
           ".read": "auth != null && (auth.uid === root.child('orders').child($orderId).child('customerUid').val() || auth.uid === root.child('orders').child($orderId).child('courierUid').val())",
           ".write": "auth != null && auth.uid === root.child('orders').child($orderId).child('courierUid').val() && root.child('orders').child($orderId).child('active').val() === true",
-          ".validate": "newData.hasChildren(['lat', 'lng', 'accuracy', 'updatedAt', 'active']) && newData.numChildren() === 5",
+          ".validate": "newData.hasChildren(['lat', 'lng', 'accuracy', 'updatedAt', 'active'])",
           "lat": {
             ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
           },
@@ -24,7 +41,13 @@
           },
           "active": {
             ".validate": "newData.isBoolean()"
+          },
+          "$other": {
+            ".validate": false
           }
+        },
+        "$other": {
+          ".validate": false
         }
       }
     }

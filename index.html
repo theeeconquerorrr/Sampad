@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#123c35">
+    <meta name="description" content="Explore PulseDrop, a thoughtfully designed medicine delivery prototype. Demo catalogue only; no medicines are sold or delivered.">
+    <meta property="og:title" content="PulseDrop — Everyday care, thoughtfully delivered">
+    <meta property="og:description" content="Explore a medicine delivery experience prototype. Demo only; no live pharmacy or delivery service.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/icons/pulsedrop-social.png">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://www.openstreetmap.org; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <title>PulseDrop — Everyday care, thoughtfully delivered</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icons/pulsedrop.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="demo-banner"><span class="demo-banner-dot" aria-hidden="true"></span> A WEBSITE PROTOTYPE · No medicines are sold or delivered here</div>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="PulseDrop home">
+        <span class="brand-mark" aria-hidden="true">+</span>
+        <span><strong>Pulse<span>Drop</span></strong><small>Care that comes together</small></span>
+      </a>
+      <label class="search"><span class="visually-hidden">Search catalogue</span><input id="searchInput" type="search" placeholder="Search medicines and essentials" autocomplete="off"></label>
+      <nav class="header-actions" aria-label="Main actions">
+        <button id="accountOpenBtn" class="button button-quiet" type="button">Sign in</button>
+        <button id="historyOpenBtn" class="button button-quiet" type="button">Order history</button>
+        <button id="cartOpenBtn" class="button button-primary" type="button">Cart <span id="cartCount" class="count">0</span></button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <p id="appNotice" class="notice notice-error" role="alert" hidden></p>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span aria-hidden="true">✳</span> A little more care, every day</span>
+          <h1>Everyday care,<br>made <span>thoughtful.</span></h1>
+          <p>Explore a considered medicine-delivery experience, designed around the little things that make looking after yourself feel simpler.</p>
+          <div class="hero-actions">
+            <a class="button button-light" href="#catalogueTitle">Explore essentials <span aria-hidden="true">↘</span></a>
+            <button class="hero-track-button" id="trackLatestBtn" type="button"><span class="track-play" aria-hidden="true">↗</span> Track an order</button>
+          </div>
+          <p class="hero-disclaimer">A clickable prototype only. No live pharmacy or delivery service.</p>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-orbit hero-orbit-one"></div>
+          <div class="hero-orbit hero-orbit-two"></div>
+          <div class="hero-spark hero-spark-one">✳</div>
+          <div class="hero-spark hero-spark-two">✦</div>
+          <div class="hero-pill hero-pill-one"></div>
+          <div class="hero-pill hero-pill-two"></div>
+          <div class="hero-bottle">
+            <div class="bottle-cap"></div>
+            <div class="bottle-label"><span>PD</span><i></i><i></i></div>
+          </div>
+          <div class="hero-note"><span class="hero-note-icon">✚</span><span><strong>A little care</strong><small>goes a long way</small></span></div>
+          <span class="hero-sticker">MADE FOR<br>EVERYDAY</span>
+        </div>
+      </section>
+
+      <section class="service-strip" aria-label="About this prototype">
+        <div class="service-item"><span class="service-icon">✳</span><span><strong>A thoughtful experience</strong><small>Made to feel refreshingly simple</small></span></div>
+        <div class="service-divider" aria-hidden="true"></div>
+        <div class="service-item"><span class="service-icon service-icon-peach">⌕</span><span><strong>Everyday essentials</strong><small>Browse our illustrative catalogue</small></span></div>
+        <div class="service-divider" aria-hidden="true"></div>
+        <div class="service-item"><span class="service-icon service-icon-yellow">♡</span><span><strong>Designed with care</strong><small>Your privacy matters, always</small></span></div>
+      </section>
+
+      <section id="trackingPanel" class="panel tracking-panel" aria-labelledby="trackingTitle" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">Demo order tracking</p><h2 id="trackingTitle">Track an existing order</h2></div>
+          <button class="button button-quiet" id="hideTrackingBtn" type="button">Hide tracking</button>
+        </div>
+        <p class="muted">Sign in with the customer account linked to a Firebase order. Local demo orders work without an account or Firebase.</p>
+        <form id="customerTrackForm" class="inline-form">
+          <label>Order ID<input id="customerOrderId" autocomplete="off" pattern="[A-Za-z0-9_\x2d]{1,80}" required placeholder="Order ID from confirmation"></label>
+          <button class="button button-dark" type="submit">Track order</button>
+        </form>
+        <p id="customerTrackMessage" class="status-message" role="status" aria-live="polite"></p>
+        <div id="liveTrackingDetails" class="tracking-details" hidden>
+          <h3 id="liveOrderStatus">Order status</h3>
+          <ol id="statusSteps" class="progress-steps" aria-label="Order progress"></ol>
+          <p id="liveLocationState" class="muted"></p>
+          <p id="liveLocationCoordinates" class="coordinate"></p>
+          <p id="liveLocationUpdatedAt" class="muted small"></p>
+          <iframe id="trackingMap" title="Illustrative order tracking map" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts"></iframe>
+          <p class="small muted">Map tiles load from OpenStreetMap. Local demo coordinates are illustrative and are not a courier's location.</p>
+        </div>
+      </section>
+
+      <section class="catalogue" aria-labelledby="catalogueTitle">
+        <div class="section-heading catalogue-heading">
+          <div><p class="eyebrow">Catalogue</p><h2 id="catalogueTitle">Everyday essentials</h2></div>
+          <div class="filters">
+            <label>Type
+              <select id="typeFilter">
+                <option value="all">All products</option><option value="otc">OTC only</option><option value="rx">Rx only</option>
+              </select>
+            </label>
+            <label>Cold-chain
+              <select id="coldFilter"><option value="all">All</option><option value="cold">Cold-chain</option><option value="ambient">Ambient</option></select>
+            </label>
+            <label>Sort
+              <select id="sortFilter"><option value="default">Featured</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option></select>
+            </label>
+          </div>
+        </div>
+        <div class="category-list" id="categoryTabs" aria-label="Product categories">
+          <button class="category-button selected" data-cat="All" type="button" aria-pressed="true">All essentials</button>
+          <button class="category-button" data-cat="Common Medicines" type="button" aria-pressed="false">Common medicines</button>
+          <button class="category-button" data-cat="Cold-Chain" type="button" aria-pressed="false">Cold-chain</button>
+          <button class="category-button" data-cat="Cardiac & Diabetes" type="button" aria-pressed="false">Cardiac &amp; diabetes</button>
+          <button class="category-button" data-cat="First Aid & Devices" type="button" aria-pressed="false">First aid &amp; devices</button>
+        </div>
+        <div class="catalogue-results"><p id="resultCount" class="small muted" role="status" aria-live="polite"></p><button id="clearFiltersBtn" class="text-button" type="button">Clear filters</button></div>
+        <div id="productGrid" class="product-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="privacy-note" aria-labelledby="privacyTitle">
+        <h2 id="privacyTitle">Privacy and demo safety</h2>
+        <p>Use fictional details only. Do not enter real medical information. Prescription files are never uploaded or saved; they are used only to unlock this demo checkout and are cleared when the order is placed or the page is reloaded.</p>
+        <p>The cart, local order history and optional refill reminder dates are stored in this browser until you clear browser data. Delivery details are used only during checkout and are not retained. Firebase, when configured, stores a customer UID, order status and the latest courier location until an administrator deletes the demo record; this prototype does not automatically expire Firebase data.</p>
+        <p>This prototype does not verify prescriptions or provide healthcare. A real launch requires a licensed pharmacy partner, pharmacist-led prescription verification and legal review.</p>
+      </section>
+    </main>
+
+    <dialog id="productDialog" class="dialog product-dialog" aria-labelledby="productDialogTitle">
+      <button class="dialog-close" type="button" data-close="productDialog" aria-label="Close product details">×</button>
+      <div id="productDetailContent"></div>
+    </dialog>
+
+    <dialog id="cartDialog" class="dialog drawer" aria-labelledby="cartTitle">
+      <div class="dialog-heading"><div><h2 id="cartTitle">Your demo cart</h2><p class="small muted">Illustrative checkout only</p></div><button class="dialog-close" type="button" data-close="cartDialog" aria-label="Close cart">×</button></div>
+      <div id="cartItems" class="cart-items"></div>
+      <div id="rxAlert" class="notice notice-warning" hidden>
+        <strong>Prescription required</strong><p>An Rx item is in your demo cart. Attach a file to continue; no prescription is reviewed or uploaded.</p>
+        <button id="openRxBtn" class="text-button" type="button">Attach a demo prescription</button>
+      </div>
+      <div class="cart-footer">
+        <p class="total-row"><span>Illustrative item total</span><strong id="cartSubtotal">₹0</strong></p>
+        <button id="checkoutBtn" class="button button-primary button-wide" type="button" disabled>Continue to demo checkout · ₹0</button>
+      </div>
+    </dialog>
+
+    <dialog id="rxDialog" class="dialog compact-dialog" aria-labelledby="rxTitle">
+      <button class="dialog-close" type="button" data-close="rxDialog" aria-label="Close prescription dialog">×</button>
+      <h2 id="rxTitle">Attach a prescription (demo)</h2>
+      <p class="muted">This prototype does not verify prescriptions. Do not select real medical documents. The file is not uploaded and is cleared on reload.</p>
+      <label class="file-picker">Choose a demo image or PDF<input id="rxFileInput" type="file" accept="image/*,.pdf"></label>
+      <p id="rxFileName" class="small muted">No file selected</p>
+      <p id="rxError" class="notice notice-error" role="alert" hidden>Select an image or PDF file to continue.</p>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" data-close="rxDialog">Cancel</button><button id="confirmRxBtn" class="button button-primary" type="button">Use for demo</button></div>
+    </dialog>
+
+    <dialog id="checkoutDialog" class="dialog compact-dialog" aria-labelledby="checkoutTitle">
+      <button class="dialog-close" type="button" data-close="checkoutDialog" aria-label="Close checkout">×</button>
+      <h2 id="checkoutTitle">Demo checkout</h2>
+      <p class="notice notice-warning">No purchase, payment, address or product details are submitted. Use fictional information only.</p>
+      <form id="checkoutForm">
+        <fieldset>
+          <legend>Delivery address · demo only</legend>
+          <label>Street / landmark<input id="addressLine" maxlength="120" autocomplete="off" required placeholder="Use a fictional address"></label>
+          <div class="form-row">
+            <label>City<input id="addressCity" maxlength="80" autocomplete="off" required></label>
+            <label>PIN code<input id="addressPin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label>
+          </div>
+          <label>Delivery window
+            <select id="deliveryWindow" required><option value="soon">Soon · illustrative 25–40 min</option><option value="later">Later today · illustrative</option></select>
+          </label>
+        </fieldset>
+        <div id="checkoutSummary" class="checkout-summary"></div>
+        <p id="checkoutEstimate" class="small muted">Illustrative delivery estimate: 25–40 minutes. Not a real service.</p>
+        <p id="checkoutError" class="notice notice-error" role="alert" hidden></p>
+        <div class="dialog-actions"><button id="backToCartBtn" class="button button-quiet" type="button">Back to cart</button><button id="placeOrderBtn" class="button button-primary" type="submit">Complete demo order</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="accountDialog" class="dialog compact-dialog" aria-labelledby="accountTitle">
+      <button class="dialog-close" type="button" data-close="accountDialog" aria-label="Close account">×</button>
+      <h2 id="accountTitle">Your PulseDrop account</h2>
+      <p id="accountAuthMessage" class="status-message" role="status" aria-live="polite">Live customer accounts are optional for local demo checkout.</p>
+      <div id="accountAuthForms">
+        <div class="tabs" role="tablist" aria-label="Account action">
+          <button id="accountSignInTab" type="button" role="tab" aria-selected="true">Sign in</button>
+          <button id="accountSignUpTab" type="button" role="tab" aria-selected="false">Create account</button>
+        </div>
+        <form id="accountSignInForm" class="form-stack">
+          <label>Email<input id="accountSignInEmail" type="email" autocomplete="email" required></label>
+          <label>Password<input id="accountSignInPassword" type="password" autocomplete="current-password" required></label>
+          <button class="button button-primary button-wide" type="submit">Sign in</button>
+        </form>
+        <form id="accountSignUpForm" class="form-stack" hidden>
+          <label>Full name<input id="accountName" autocomplete="name" maxlength="100" required></label>
+          <label>Email<input id="accountSignUpEmail" type="email" autocomplete="email" required></label>
+          <label>Password<input id="accountSignUpPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+          <label>Confirm password<input id="accountConfirmPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+          <button class="button button-primary button-wide" type="submit">Create account</button>
+        </form>
+      </div>
+      <div id="accountSignedIn" class="account-signed-in" hidden>
+        <p>Signed in as <strong id="accountSignedInEmail"></strong></p>
+        <button id="accountSignOutBtn" class="button button-quiet" type="button">Sign out</button>
+      </div>
+      <p class="small muted">Demo website only. Do not enter sensitive personal or medical information.</p>
+    </dialog>
+
+    <dialog id="historyDialog" class="dialog compact-dialog" aria-labelledby="historyTitle">
+      <button class="dialog-close" type="button" data-close="historyDialog" aria-label="Close order history">×</button>
+      <h2 id="historyTitle">Demo order history</h2>
+      <p class="small muted">Stored only in this browser. Reordering adds available catalogue items to your cart.</p>
+      <div id="orderHistory" class="history-list"></div>
+    </dialog>
+
+    <div id="orderToast" class="toast" role="status" aria-live="polite" hidden>
+      <strong>Demo tracking order created</strong>
+      <p>This is not a real purchase or delivery.</p>
+      <p id="demoOrderId" class="order-id"></p>
+      <button id="trackCreatedOrderBtn" class="text-button" type="button">Track this demo order</button>
+    </div>
+
+    <footer class="site-footer">
+      <a class="download-link" href="./pulsedrop-demo.html" download="pulsedrop-demo.html">Download the standalone demo</a>
+      <p>PulseDrop prototype · No medicines are sold or delivered through this page</p>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "pulsedrop-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && npm run build:single && node -e \"require('node:fs').copyFileSync('standalone/pulsedrop-demo.html', 'dist/pulsedrop-demo.html')\"",
+    "build:single": "vite build --config vite.single.config.js",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:rules": "firebase emulators:exec --only database \"node --test tests/rules.test.js\""
+  },
+  "dependencies": {
+    "firebase": "^13.0.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@playwright/test": "^1.56.0",
+    "firebase-tools": "^15.36.0",
+    "vite": "^7.1.12"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.7"
+  }
+}

@@ -1,29 +1,56 @@
-# PulseDrop live tracking setup
+# PulseDrop demo app
 
-The tracking client uses Firebase Authentication (email/password) and Firebase Realtime Database. Courier coordinates are written only after the courier signs in, enters an assigned order ID, grants browser location permission, and starts sharing. The customer signs in to the account attached to that order and subscribes to the order's live location.
+This is a demo-only storefront prototype. It is not a pharmacy, does not take payment, and does not fulfill orders. Do not enter real medical or personal information.
 
-## Required before it can track real orders
+## Run locally
 
-1. Create a Firebase project and register a Web app.
-2. Enable Email/Password in Firebase Authentication and create customer and courier accounts through a trusted process. Do not add public account creation to the courier page.
-3. Create a Realtime Database. Copy the Web app's `apiKey`, `authDomain`, `databaseURL`, `projectId`, and `appId` into `firebase-config.js`. These web-app values are public identifiers, not service-account credentials. Never put a Firebase service-account private key in browser code.
-4. Deploy `database.rules.json` from this directory. The rules permit location/status reads only for the customer or courier assigned to the order. The courier can write coordinates only for an active order assigned to that courier.
-5. Connect a trusted order backend (Admin SDK or another server-side service) to create `/orders/{orderId}` records with `customerUid`, `courierUid`, and `active: true`, and to write `/orders/{orderId}/status`. For example:
+Requires Node.js 24.12+ and npm.
 
-   ```json
-   {
-     "customerUid": "Firebase Auth UID",
-     "courierUid": "assigned courier Firebase Auth UID",
-     "active": true,
-     "status": "preparing"
-   }
-   ```
+```sh
+npm install
+npm run dev
+```
 
-   Client pages intentionally cannot create or assign orders. When delivery ends, the backend should set `active` to `false` and stop location sharing.
-6. Host `pulsedrop.html` and the `pulsedrop-realtime/` directory on the same HTTPS origin. Geolocation does not work on ordinary insecure HTTP hosting; localhost is suitable for development.
+Without Firebase settings, the catalogue, cart, prescription gate, checkout, local order tracking and order history work in browser-only mock mode. The delivery address is requested only to demonstrate checkout and is never retained or sent. The selected prescription file is never uploaded or persisted.
 
-Order IDs may contain only letters, numbers, `_`, and `-`. The trusted backend must set status values such as `placed`, `preparing`, `picked_up`, `delivered`, or `cancelled`; only the assigned courier's latest location is stored. The customer page links to OpenStreetMap for the received coordinates; it does not request the customer's location.
+For Firebase Authentication and courier tracking, copy `.env.example` to `.env.local` and fill in the web-app settings from Firebase Console. These client settings are public identifiers, not credentials; do not put service-account keys in the app. `.env.local` is ignored by git. If settings are absent, Firebase customer accounts are disabled and checkout remains local.
 
-The checkout in `pulsedrop.html` is still a prototype and does not create Firebase order records. Until a real order backend assigns customer and courier UIDs, the live tracker will correctly reject or fail to find orders. Test Firebase rules with the Local Emulator Suite before connecting real user data. Define a retention policy for precise courier coordinates and delete tracking data when no longer needed.
+Enable Email/Password sign-in in Firebase Authentication. Customer checkout creates a minimal order record containing only the customer UID, status, assigned courier UID, active state and server timestamp. Product details, delivery address, prescription and payment information are not sent to Firebase. A customer must sign in to create a Firebase tracking order.
 
-The client uses Firebase's modular JavaScript SDK from Google's CDN. For a production build, bundle and pin dependencies locally rather than relying on CDN modules.
+## Database permissions
+
+`database.rules.json` denies database-wide reads and writes by default. Customers can read only orders whose `customerUid` matches their authenticated UID. Approved couriers can claim unassigned orders and read the minimal unclaimed order record; only the assigned courier can write the location while the order is active. Courier status transitions are constrained to placed → packed → picked up → delivered. Courier approval must be set by an administrator under `/couriers/{uid}/enabled`; client code cannot grant courier permissions.
+
+Install a Java 21+ runtime to run the Realtime Database Emulator tests, then run:
+
+```sh
+npm run test:rules
+```
+
+Deploy rules and Hosting to the selected Firebase project after reviewing the data and retention settings:
+
+```sh
+firebase use <your-firebase-project-id>
+firebase deploy --only database,hosting
+```
+
+Firebase Hosting serves the app over HTTPS. Geolocation is used only by the separate, administrator-restricted courier page. Configure authorized Firebase Authentication domains before using hosted accounts.
+
+## Build, browser tests and hosting
+
+```sh
+npm run build
+npm run build:single
+npx playwright install chromium
+npm run test:e2e
+```
+
+Vite bundles the app and stylesheet; the service worker caches the app shell and same-origin assets after first use for offline catalogue browsing. `npm run build` also places the standalone HTML export at `dist/pulsedrop-demo.html`, which is linked from the site footer for download. `public/_headers` supplies CSP/security headers on compatible static hosts, and `firebase.json` applies the same headers on Firebase Hosting. The installed PWA is served over HTTPS (or localhost during development).
+
+`npm run build:single` also creates `standalone/pulsedrop-demo.html`, a self-contained HTML export for sharing or opening locally. The standalone export uses local mock checkout; Firebase hosting/PWA features remain in the regular multi-file build.
+
+## Data and retention
+
+The browser stores the demo cart, local order history and optional refill reminder dates in local storage until the user clears browser data. It does not retain checkout addresses. The Rx file is kept only in the page's temporary file input and is neither read nor uploaded; it is cleared after checkout or page reload. Firebase stores the minimal tracking record and latest courier location until an administrator deletes the record; this prototype does not automatically expire Firebase data. Delete demo records regularly.
+
+For a real service, a licensed pharmacy partner, pharmacist-led prescription verification, secure server-side handling and legal review are prerequisites. This demo must not be used to make healthcare decisions.

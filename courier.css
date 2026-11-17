@@ -1,0 +1,15 @@
+:root { color-scheme: light; font-family: system-ui, sans-serif; color: #0f172a; background: #f8fafc; }
+body { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+main { background: white; border: 1px solid #cbd5e1; border-radius: 16px; padding: 24px; }
+h1 { margin-top: 0; }
+.notice { padding: 12px; border-radius: 10px; background: #fff7ed; color: #9a3412; }
+form { display: grid; gap: 12px; margin: 20px 0; }
+label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px; border: 1px solid #94a3b8; border-radius: 8px; font: inherit; }
+button { min-height: 44px; padding: 10px 14px; border: 0; border-radius: 8px; background: #0f766e; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+button:disabled { background: #94a3b8; cursor: not-allowed; }
+button.secondary { background: #475569; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#courierMessage { min-height: 1.5em; }
+@media (max-width: 480px) { main { padding: 18px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
