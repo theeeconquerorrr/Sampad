@@ -1,27 +1,9 @@
 import products from "./products.json";
 import { createCustomerTracking } from "./customer-tracking.js";
-import paracetamolImage from "./products/paracetamol.svg?url";
-import insulinGlargineImage from "./products/insulin-glargine.svg?url";
-import antibioticImage from "./products/antibiotic.svg?url";
-import heartCareImage from "./products/heart-care.svg?url";
-import glucoseStripsImage from "./products/glucose-strips.svg?url";
-import insulinAspartImage from "./products/insulin-aspart.svg?url";
-import orsSachetsImage from "./products/ors-sachets.svg?url";
-import capsulesImage from "./products/capsules.svg?url";
 
 const CART_KEY = "pulsedrop-demo-cart";
 const ORDERS_KEY = "pulsedrop-demo-orders";
 const REMINDERS_KEY = "pulsedrop-demo-refill-reminders";
-const productImages = {
-  "paracetamol.svg": paracetamolImage,
-  "insulin-glargine.svg": insulinGlargineImage,
-  "antibiotic.svg": antibioticImage,
-  "heart-care.svg": heartCareImage,
-  "glucose-strips.svg": glucoseStripsImage,
-  "insulin-aspart.svg": insulinAspartImage,
-  "ors-sachets.svg": orsSachetsImage,
-  "capsules.svg": capsulesImage
-};
 const ORDER_STEPS = [
   ["placed", "Placed"],
   ["packed", "Packed"],
@@ -95,9 +77,79 @@ function cartItemFor(id) {
 }
 
 function productVisualFor(product) {
-  const image = productImages[product.image];
-  if (!image) throw new Error(`Missing product image for ${product.name}.`);
-  return `<img class="product-visual${product.coldChain ? " cold" : ""}" src="${escapeHTML(image)}" alt="${escapeHTML(product.imageAlt)}" loading="lazy" decoding="async">`;
+  const palettes = [
+    ["#e6eee4", "#44664c", "#e7c68b"],
+    ["#e8eff0", "#52777c", "#b9d1da"],
+    ["#f3eadc", "#a87150", "#e6c594"],
+    ["#eeeae4", "#667d63", "#d0d9c6"]
+  ];
+  const [background, accent, detail] = palettes[(product.id - 1) % palettes.length];
+  const label = escapeHTML(product.name.length > 23 ? `${product.name.slice(0, 20)}…` : product.name);
+  let illustration;
+
+  if (product.coldChain) {
+    illustration = `
+      <g transform="translate(480 112) rotate(29)">
+        <rect x="34" y="12" width="56" height="292" rx="28" fill="#f8fbf8" stroke="${accent}" stroke-width="8"/>
+        <rect x="41" y="39" width="42" height="60" rx="15" fill="${accent}"/>
+        <path d="M62 124v95" stroke="${detail}" stroke-width="7"/>
+        <rect x="51" y="232" width="22" height="38" rx="7" fill="${detail}"/>
+        <path d="M53 302h18l-9 36z" fill="${accent}"/>
+      </g>
+      <g transform="translate(561 83)" fill="${accent}" font-family="Arial,sans-serif" font-size="54" font-weight="700">
+        <text x="0" y="49">✳</text>
+      </g>`;
+  } else if (product.name.includes("Strips")) {
+    illustration = `
+      <g transform="translate(482 120) rotate(7)">
+        <rect width="168" height="244" rx="35" fill="${accent}"/>
+        <rect x="20" y="24" width="128" height="99" rx="17" fill="#dce8dc"/>
+        <path d="M52 81h64" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="84" cy="176" r="22" fill="${detail}"/>
+        <path d="M73 244h22l-11 38z" fill="#fffdf5"/>
+      </g>`;
+  } else if (product.name.includes("ORS")) {
+    illustration = `
+      <g transform="translate(483 115) rotate(-5)">
+        <path d="M17 0h151l12 20v260l-12 17H17L4 281V20z" fill="#fff9e8" stroke="${detail}" stroke-width="6"/>
+        <path d="M8 32h164v26H8z" fill="${accent}"/>
+        <text x="28" y="107" fill="${accent}" font-family="Georgia,serif" font-size="34" font-weight="700">HYDRATE</text>
+        <path d="M28 133h109M28 151h82" stroke="${detail}" stroke-width="6" stroke-linecap="round"/>
+        <path d="M75 219c0-23 23-42 23-42s23 19 23 42a23 23 0 1 1-46 0z" fill="#b9dadd"/>
+      </g>`;
+  } else {
+    illustration = `
+      <g transform="translate(448 126) rotate(7)">
+        <rect x="7" y="14" width="188" height="252" rx="12" fill="${accent}"/>
+        <path d="M7 38h188v44H7z" fill="${detail}"/>
+        <rect x="26" y="108" width="150" height="106" rx="8" fill="#faf8ef"/>
+        <path d="M46 177h108" stroke="${accent}" stroke-width="7" stroke-linecap="round"/>
+        <path d="M46 193h78" stroke="${detail}" stroke-width="6" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(514 350) rotate(-22)">
+        <rect width="124" height="46" rx="23" fill="${detail}"/>
+        <path d="M62 2v42" stroke="#fffaf0" stroke-width="4"/>
+      </g>`;
+  }
+
+  return `<svg class="product-visual${product.coldChain ? " cold" : ""}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="${escapeHTML(product.imageAlt)}">
+    <rect width="800" height="520" rx="30" fill="${background}"/>
+    <circle cx="147" cy="104" r="116" fill="#fffdf5" opacity=".72"/>
+    <circle cx="679" cy="431" r="138" fill="${detail}" opacity=".28"/>
+    <ellipse cx="400" cy="419" rx="227" ry="25" fill="#364b3c" opacity=".14"/>
+    <g>
+      <path d="M187 144h227l39 25v235H187z" fill="#fffdf8"/>
+      <path d="M414 144l39 25v235h-39z" fill="${detail}" opacity=".72"/>
+      <path d="M187 144h227l39 25H226z" fill="#fff"/>
+      <rect x="211" y="183" width="178" height="15" rx="7" fill="${accent}"/>
+      <text x="212" y="237" fill="#7b8878" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="2">ILLUSTRATIVE DEMO</text>
+      <text x="211" y="287" fill="#30483a" font-family="Georgia,serif" font-size="24" font-weight="600">${label}</text>
+      <path d="M211 317h155" stroke="${detail}" stroke-width="3"/>
+      <text x="211" y="347" fill="#7b8878" font-family="Arial,sans-serif" font-size="12" letter-spacing="1.5">CONCEPT PACKAGING</text>
+    </g>
+    ${illustration}
+    <text x="38" y="480" fill="#71806f" font-family="Arial,sans-serif" font-size="13" letter-spacing="2">PULSE DROP · SAMPLE PRODUCT ART</text>
+  </svg>`;
 }
 
 function renderProducts() {
